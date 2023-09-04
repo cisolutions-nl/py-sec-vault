@@ -46,6 +46,8 @@ jobs:
   unit-tests:
     runs-on: ubuntu-20.04
     needs: [isort, flake8, black, bandit]
+    env:
+      VAULT_TOKEN: very-secret-token
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
