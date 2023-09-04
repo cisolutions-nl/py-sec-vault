@@ -1,11 +1,11 @@
 import logging
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Optional, Mapping, Union
+from typing import Mapping, Optional, Union
 
 import requests
 
-from .exceptions import InvalidPathError, ForbiddenError
+from .exceptions import ForbiddenError, InvalidPathError
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,9 @@ class Client(ABC):
     def __post_init__(self):
         self._auth()
 
-    def read_secrets(self, engine_name: str, vault_path: str) -> Mapping[str, str]:
+    def read_secrets(
+        self, engine_name: str, vault_path: str
+    ) -> Mapping[str, str]:
         """Reads all secrets from vault engine and path.
         :param engine_name: the name of the vault engine;
         :param vault_path: the name of the vault path;
@@ -33,11 +35,14 @@ class Client(ABC):
         if response.status_code == 404:
             raise InvalidPathError(vault_path=vault_path)
         if response.status_code == 403:
-            raise ForbiddenError(engine_name=engine_name, vault_path=vault_path)
+            raise ForbiddenError(
+                engine_name=engine_name, vault_path=vault_path
+            )
         return response.json()["data"]["data"]
 
     def _auth(self) -> None:
-        """An abstract method for authenticating with vault used by subclasses."""
+        """An abstract method for authenticating
+        with vault used by subclasses."""
         raise NotImplementedError
 
 

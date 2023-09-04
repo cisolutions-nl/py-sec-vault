@@ -1,0 +1,62 @@
+name: python checks
+on: pull_request
+jobs:
+  bandit:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: jpetrucciani/bandit-check@main
+        with:
+          path: "."
+  black:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.11.4
+      - run: |
+          python -m pip install --upgrade pip
+          pip install black==22.12.0
+      - run: |
+          black --check --line-length=79 --verbose .
+  flake8:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.11.4
+      - run: |
+          python -m pip install --upgrade pip
+          pip install flake8==5.0.4
+      - run: |
+          flake8 --verbose .
+  isort:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.11.4
+      - run: |
+          python -m pip install --upgrade pip
+          pip install isort==5.11.4
+      - run: |
+          isort --profile black --check-only .      
+  unit-tests:
+    runs-on: ubuntu-20.04
+    needs: [isort, flake8, black, bandit]
+    env:
+      VAULT_TOKEN: very-secret-token
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.11.4
+      - run: |
+          python -m pip install --upgrade pip
+          pip install requests==2.31.0
+          pip install pytest==7.4.0
+          pip install pytest-mock==3.11.1
+      - run: |
+          python -m pytest .      
